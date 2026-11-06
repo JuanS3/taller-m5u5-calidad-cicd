@@ -1,0 +1,27 @@
+# Entornos virtuales y cachés de Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Datos generados: el pipeline los regenera con semilla fija (reproducible),
+# así que NO se versionan. Solo se conservan los .gitkeep de las carpetas.
+data/raw/*
+!data/raw/.gitkeep
+data/clean/*
+!data/clean/.gitkeep
+data/reportes/*
+!data/reportes/.gitkeep
+
+# Configuración local de GX (este taller usa contexto efímero, por si acaso)
+great_expectations/
+.gx/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
