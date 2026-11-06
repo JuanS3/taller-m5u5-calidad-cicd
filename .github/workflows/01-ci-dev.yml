@@ -14,7 +14,7 @@ on:
         default: "95"
 
 env:
-  PYTHON_VERSION: "3.14"  
+  PYTHON_VERSION: "3.14"
 
 jobs:
   calidad-datos:
@@ -22,26 +22,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descarga del codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Config Python
-        uses: action/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: ${{ env.PYTHON_VERSION }}  
-          cache: pip
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Instalar dependecias
         run: pip install -r requirements.txt
 
       - name: Ejecucion del pipeline
         env:
-          MIN_SUCCESS: ${{ inputs.min_success || '95' }}  
+          MIN_SUCCESS: ${{ inputs.min_success || '95' }}
         run: |
           python -m src.pipeline.run_pipeline --min-success ${MIN_SUCCESS}
 
       - name: Publicar reportes (Artefacto)
         if: always()
-        uses: action/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: reportes-calidad
           path: data/reportes/
