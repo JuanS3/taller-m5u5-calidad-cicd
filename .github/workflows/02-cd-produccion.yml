@@ -1,0 +1,57 @@
+name: "CD - Produccion"
+
+on:
+    push:
+        tags:
+            - "v*.*.*"
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+env:
+    PY_VERSION: "3.14"
+
+jobs:
+    release:
+        name: Gate de 100% + Release
+        runs-on: ubuntu-latest
+        steps:
+            - name: Descarga del codigo
+              uses: actions/checkout@v7
+
+            - name: Config Python
+              uses: actions/setup-python@v7
+              with:
+                  python-version: ${{ env.PY_VERSION }}
+
+            - name: Instalar dependecias
+              run: pip install -r requirements.txt
+
+            - name: Ejecucion del pipeline
+              run: |
+                  python -m src.pipeline.run_pipeline --min-success 100
+
+            - name: Publicacion de datos - Release
+              uses: softprops/action-gh-release@v3
+              if: github.ref_type == 'tag'
+              with:
+                  files: |
+                      data/clean/customers_clean.csv
+                      data/clean/customers_clean.parquet
+                      data/clean/orders_clean.csv
+                      data/clean/orders_clean.parquet
+                  generate_release_notes: true
+                  body: |
+                      # Archivos listos
+
+                      Publicados los archivos limpios y listos para el consumo
+
+            - name: Publicar reportes (Artefacto)
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: reportes-calidad-produccion
+                  path: data/reportes/
+                  if-no-files-found: warn
+                  retention-days: 90
