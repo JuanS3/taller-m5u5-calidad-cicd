@@ -1,48 +1,57 @@
 name: "Calidad de datos (DEV)"
 
 on:
-  push:
-    branches:
-      - master
-      - develop
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      min_success:
-        description: "Umbral del gate (%)"
-        required: false
-        default: "95"
+    push:
+        branches:
+            - master
+            - develop
+    pull_request:
+    workflow_dispatch:
+        inputs:
+            min_success:
+                description: "Umbral del gate (%)"
+                required: false
+                default: "95"
 
 env:
-  PYTHON_VERSION: "3.14"
+    PYTHON_VERSION: "3.14"
 
 jobs:
-  calidad-datos:
-    name: Pipeline de data quality
-    runs-on: ubuntu-latest
-    steps:
-      - name: Descarga del codigo
-        uses: actions/checkout@v7
+    calidad-datos:
+        name: Pipeline de data quality
+        runs-on: ubuntu-latest
+        steps:
+            - name: Descarga del codigo
+              uses: actions/checkout@v7
 
-      - name: Config Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+            - name: Config Python
+              uses: actions/setup-python@v7
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Instalar dependecias
-        run: pip install -r requirements.txt
+            - name: Instalar dependecias
+              run: pip install -r requirements.txt
 
-      - name: Ejecucion del pipeline
-        env:
-          MIN_SUCCESS: ${{ inputs.min_success || '95' }}
-        run: |
-          python -m src.pipeline.run_pipeline --min-success ${MIN_SUCCESS}
+            - name: Ejecucion del pipeline
+              env:
+                  MIN_SUCCESS: ${{ inputs.min_success || '95' }}
+              run: |
+                  python -m src.pipeline.run_pipeline --min-success ${MIN_SUCCESS}
 
-      - name: Publicar reportes (Artefacto)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: reportes-calidad
-          path: data/reportes/
-          if-no-files-found: warn
-          retention-days: 7
+            - name: Publicar reportes (Artefacto)
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: reportes-calidad
+                  path: data/reportes/
+                  if-no-files-found: warn
+                  retention-days: 7
+
+            - name: Bandit validation
+              uses: shundor/python-bandit-scan@v1
+              with: # optional arguments
+                  path: "."
+                  level: high
+                  confidence: high
+                  # exit with 0, even with results found
+                  exit_zero: true # optional, default is DEFAULT (exit with results-based value)
