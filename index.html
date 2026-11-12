@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Taller M5 U5: Calidad de datos con Great Expectations y CI/CD en GitHub Actions.">
+<title>DataQuality | Taller M5 U5</title>
+
+<style>
+:root {
+  --bg: #080d18;
+  --panel: #111a2b;
+  --primary: #38bdf8;
+  --green: #34d399;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #263449;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 8%;
+  background: rgba(8,13,24,.95);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+nav ul {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+}
+
+nav a:hover {
+  color: var(--primary);
+}
+
+.hero {
+  padding: 110px 8%;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at top, #12304b 0%, transparent 65%);
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 16px;
+  border: 1px solid #276080;
+  border-radius: 30px;
+  color: var(--primary);
+  margin-bottom: 25px;
+  font-size: 13px;
+}
+
+.hero h1 {
+  font-size: clamp(38px, 6vw, 68px);
+  line-height: 1.15;
+  margin-bottom: 25px;
+}
+
+.hero h1 span {
+  color: var(--primary);
+}
+
+.hero p {
+  max-width: 750px;
+  margin: auto;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.buttons {
+  margin-top: 35px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 13px 25px;
+  border-radius: 8px;
+  font-weight: bold;
+  background: var(--primary);
+  color: #07111e;
+  transition: .3s;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  opacity: .85;
+}
+
+.btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: white;
+}
+
+section {
+  padding: 80px 8%;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 34px;
+  margin-bottom: 15px;
+}
+
+.section-description {
+  text-align: center;
+  color: var(--muted);
+  max-width: 700px;
+  margin: 0 auto 45px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 25px;
+  transition: .3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+}
+
+.card h3 {
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.icon {
+  font-size: 32px;
+  margin-bottom: 15px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.stat {
+  text-align: center;
+  padding: 25px;
+  background: var(--panel);
+  border-radius: 12px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 36px;
+  color: var(--green);
+}
+
+.stat span {
+  color: var(--muted);
+}
+
+.workflow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.step {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 15px;
+  min-width: 145px;
+  text-align: center;
+}
+
+.step strong {
+  color: var(--primary);
+  display: block;
+}
+
+.arrow {
+  color: var(--green);
+  font-size: 25px;
+}
+
+.terminal {
+  background: #030712;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 25px;
+  overflow-x: auto;
+  margin-top: 25px;
+}
+
+.terminal pre {
+  color: var(--green);
+  font-size: 14px;
+  line-height: 2;
+}
+
+.structure {
+  background: #030712;
+  padding: 25px;
+  border-radius: 12px;
+  overflow-x: auto;
+  color: #7dd3fc;
+  font-family: monospace;
+  line-height: 1.8;
+}
+
+.highlight {
+  color: var(--green);
+}
+
+footer {
+  text-align: center;
+  padding: 35px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+@media(max-width: 700px) {
+  nav {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  nav ul {
+    gap: 13px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .hero {
+    padding: 75px 6%;
+  }
+
+  section {
+    padding: 60px 6%;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div class="logo">⚡ DataQuality</div>
+  <ul>
+    <li><a href="#proyecto">Proyecto</a></li>
+    <li><a href="#calidad">Calidad</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#tecnologias">Tecnologías</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <span class="tag">PAE DATA ENGINEER · MÓDULO 5 · UNIDAD 5</span>
+
+  <h1>
+    Calidad de Datos<br>
+    con <span>CI/CD</span>
+  </h1>
+
+  <p>
+    Construcción de pipelines de datos confiables mediante
+    Great Expectations, Python, Pandas y GitHub Actions.
+    Automatizamos la validación, limpieza y publicación
+    de datos certificados.
+  </p>
+
+  <div class="buttons">
+    <a class="btn" href="https://github.com/JuanS3/taller-m5u5-calidad-cicd" target="_blank">
+      Ver repositorio →
+    </a>
+    <a class="btn secondary" href="#pipeline">
+      Explorar proyecto
+    </a>
+  </div>
+</header>
+
+<section id="proyecto">
+  <h2 class="section-title">¿De qué trata el proyecto?</h2>
+
+  <p class="section-description">
+    Este taller demuestra cómo implementar controles de calidad
+    en pipelines de datos y evitar que información defectuosa
+    llegue a producción.
+  </p>
+
+  <div class="grid">
+    <article class="card">
+      <div class="icon">📊</div>
+      <h3>Calidad de datos</h3>
+      <p>
+        Evaluación de datos mediante expectativas y reglas
+        de validación con Great Expectations.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🧹</div>
+      <h3>Limpieza de datos</h3>
+      <p>
+        Uso de Pandas para reparar registros inconsistentes
+        y descartar información que no cumple las reglas.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="icon">⚙️</div>
+      <h3>Automatización</h3>
+      <p>
+        Integración continua mediante GitHub Actions
+        para ejecutar automáticamente el pipeline.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🚀</div>
+      <h3>Despliegue seguro</h3>
+      <p>
+        Publicación de datos certificados únicamente
+        cuando se cumplen los umbrales de calidad.
+      </p>
+    </article>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <strong>6</strong>
+      <span>Dimensiones de calidad</span>
+    </div>
+    <div class="stat">
+      <strong>95%</strong>
+      <span>Umbral de desarrollo</span>
+    </div>
+    <div class="stat">
+      <strong>100%</strong>
+      <span>Umbral de producción</span>
+    </div>
+    <div class="stat">
+      <strong>5</strong>
+      <span>Etapas del pipeline</span>
+    </div>
+  </div>
+</section>
+
+<section id="pipeline">
+  <h2 class="section-title">Arquitectura del Pipeline</h2>
+
+  <p class="section-description">
+    El proceso transforma datos crudos en información
+    validada y lista para su publicación.
+  </p>
+
+  <div class="workflow">
+    <div class="step">
+      <div class="icon">📥</div>
+      <strong>01. Extraer</strong>
+      <p>Datos sintéticos</p>
+    </div>
+
+    <span class="arrow">→</span>
+
+    <div class="step">
+      <div class="icon">🔍</div>
+      <strong>02. Validar</strong>
+      <p>Great Expectations</p>
+    </div>
+
+    <span class="arrow">→</span>
+
+    <div class="step">
+      <div class="icon">🧹</div>
+      <strong>03. Limpiar</strong>
+      <p>Pandas</p>
+    </div>
+
+    <span class="arrow">→</span>
+
+    <div class="step">
+      <div class="icon">🛡️</div>
+      <strong>04. Quality Gate</strong>
+      <p>Validación final</p>
+    </div>
+
+    <span class="arrow">→</span>
+
+    <div class="step">
+      <div class="icon">📦</div>
+      <strong>05. Publicar</strong>
+      <p>CSV y Parquet</p>
+    </div>
+  </div>
+</section>
+
+<section id="calidad">
+  <h2 class="section-title">Las 6 dimensiones de calidad</h2>
+
+  <p class="section-description">
+    El proyecto utiliza reglas para evaluar diferentes
+    características de los datos.
+  </p>
+
+  <div class="grid">
+    <article class="card">
+      <div class="icon">📌</div>
+      <h3>Completitud</h3>
+      <p>Comprueba que los campos obligatorios no contengan valores nulos.</p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🔑</div>
+      <h3>Unicidad</h3>
+      <p>Evita registros duplicados e identificadores repetidos.</p>
+    </article>
+
+    <article class="card">
+      <div class="icon">✅</div>
+      <h3>Validez</h3>
+      <p>Verifica formatos, patrones y valores permitidos.</p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🔗</div>
+      <h3>Consistencia</h3>
+      <p>Comprueba que los campos relacionados tengan coherencia.</p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🎯</div>
+      <h3>Exactitud</h3>
+      <p>Evalúa que los valores estén dentro de rangos realistas.</p>
+    </article>
+
+    <article class="card">
+      <div class="icon">⏱️</div>
+      <h3>Oportunidad</h3>
+      <p>Comprueba que la información esté actualizada.</p>
+    </article>
+  </div>
+</section>
+
+<section id="tecnologias">
+  <h2 class="section-title">Tecnologías utilizadas</h2>
+
+  <p class="section-description">
+    Herramientas que permiten desarrollar, validar y
+    automatizar el flujo de procesamiento de datos.
+  </p>
+
+  <div class="grid">
+    <article class="card">
+      <h3>🐍 Python</h3>
+      <p>Lenguaje principal del pipeline de datos.</p>
+    </article>
+
+    <article class="card">
+      <h3>📊 Pandas</h3>
+      <p>Transformación y limpieza de información.</p>
+    </article>
+
+    <article class="card">
+      <h3>🧪 Great Expectations</h3>
+      <p>Validación de expectativas y reglas de calidad.</p>
+    </article>
+
+    <article class="card">
+      <h3>🔄 GitHub Actions</h3>
+      <p>Integración y despliegue continuo CI/CD.</p>
+    </article>
+
+    <article class="card">
+      <h3>📦 PyArrow</h3>
+      <p>Soporte para almacenamiento en formato Parquet.</p>
+    </article>
+
+    <article class="card">
+      <h3>📝 Rich</h3>
+      <p>Visualización de información y registros en consola.</p>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Estructura del repositorio</h2>
+
+  <p class="section-description">
+    Organización modular del código fuente y los recursos.
+  </p>
+
+  <div class="structure">
+taller-m5u5-calidad-cicd/<br>
+├── <span class="highlight">.github/workflows/</span><br>
+│   ├── 01-ci-dev.yml<br>
+│   └── 02-cd-produccion.yml<br>
+├── <span class="highlight">data/</span><br>
+│   ├── raw/<br>
+│   ├── clean/<br>
+│   └── reportes/<br>
+├── <span class="highlight">docs/</span><br>
+│   └── soluciones.md<br>
+├── <span class="highlight">src/</span><br>
+│   ├── generators/<br>
+│   ├── quality/<br>
+│   ├── cleaning/<br>
+│   ├── pipeline/<br>
+│   └── config.py<br>
+├── requirements.txt<br>
+└── README.md
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Instalación y ejecución</h2>
+
+  <p class="section-description">
+    Sigue estos pasos para ejecutar el proyecto localmente.
+  </p>
+
+  <div class="terminal">
+<pre>
+# Clonar repositorio
+git clone https://github.com/JuanS3/taller-m5u5-calidad-cicd.git
+
+# Entrar al proyecto
+cd taller-m5u5-calidad-cicd
+
+# Crear entorno virtual
+python -m venv .venv
+
+# Activar entorno (Linux / macOS)
+source .venv/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar pipeline
+python -m src.pipeline.run_pipeline
+</pre>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Automatización CI/CD</h2>
+
+  <p class="section-description">
+    El repositorio implementa dos flujos de GitHub Actions
+    para controlar la calidad antes de publicar los datos.
+  </p>
+
+  <div class="grid">
+    <article class="card">
+      <div class="icon">🔄</div>
+      <h3>CI - Desarrollo</h3>
+      <p>
+        Se ejecuta mediante push y pull requests.
+        Valida los datos con un umbral mínimo del 95%
+        y genera reportes como artefactos.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="icon">🚀</div>
+      <h3>CD - Producción</h3>
+      <p>
+        Se activa mediante etiquetas de versión.
+        Exige un 100% de calidad y genera un GitHub Release
+        con los datos certificados.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section style="text-align:center">
+  <h2 class="section-title">Construyendo datos confiables</h2>
+
+  <p class="section-description">
+    La calidad no debe ser una tarea manual al final del proceso.
+    Debe formar parte de cada etapa del ciclo de vida de los datos.
+  </p>
+
+  <a class="btn"
+     href="https://github.com/JuanS3/taller-m5u5-calidad-cicd"
+     target="_blank">
+     Explorar código en GitHub →
+  </a>
+</section>
+
+<footer>
+  <p>⚡ DataQuality · Taller M5 U5</p>
+  <p>Calidad de datos · DataOps · CI/CD</p>
+  <p>Proyecto académico - PAE Data Engineer</p>
+  <p>Repositorio: JuanS3</p>
+</footer>
+
+</body>
+</html>
